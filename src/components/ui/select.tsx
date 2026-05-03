@@ -177,30 +177,63 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName;
 const SelectItem = React.forwardRef<
     React.ElementRef<typeof SelectPrimitive.Item>,
     React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
-    <SelectPrimitive.Item
-        ref={ref}
-        className={cn(
-            "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 touch-pan-y",
-            className,
-        )}
-        {...props}
-        onPointerDown={(e) => {
-            if (e.pointerType === "touch") {
-                (e.target as Element).releasePointerCapture?.(e.pointerId);
-            }
-            props.onPointerDown?.(e);
-        }}
-    >
-        <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-            <SelectPrimitive.ItemIndicator>
-                <Check className="h-4 w-4" />
-            </SelectPrimitive.ItemIndicator>
-        </span>
+>(({ className, children, ...props }, ref) => {
+    const dragRef = React.useRef<{
+        x: number;
+        y: number;
+        moved: boolean;
+    } | null>(null);
 
-        <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-    </SelectPrimitive.Item>
-));
+    return (
+        <SelectPrimitive.Item
+            ref={ref}
+            className={cn(
+                "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 touch-pan-y",
+                className,
+            )}
+            {...props}
+            onPointerDown={(e) => {
+                dragRef.current = {
+                    x: e.clientX,
+                    y: e.clientY,
+                    moved: false,
+                };
+                props.onPointerDown?.(e);
+            }}
+            onPointerMove={(e) => {
+                const d = dragRef.current;
+                if (
+                    d &&
+                    (Math.abs(e.clientX - d.x) > 6 ||
+                        Math.abs(e.clientY - d.y) > 6)
+                ) {
+                    d.moved = true;
+                }
+                props.onPointerMove?.(e);
+            }}
+            onPointerUp={(e) => {
+                if (
+                    e.pointerType === "touch" &&
+                    dragRef.current?.moved
+                ) {
+                    e.preventDefault();
+                    dragRef.current = null;
+                    return;
+                }
+                dragRef.current = null;
+                props.onPointerUp?.(e);
+            }}
+        >
+            <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                <SelectPrimitive.ItemIndicator>
+                    <Check className="h-4 w-4" />
+                </SelectPrimitive.ItemIndicator>
+            </span>
+
+            <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+        </SelectPrimitive.Item>
+    );
+});
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 
 const SelectSeparator = React.forwardRef<
