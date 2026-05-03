@@ -285,8 +285,10 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                 .replace(/[:.]/g, "-")
                 .slice(0, 19);
             const filename = `jetlag-hiding-zone-${timestamp}.json`;
+            // Web Share API blocks application/json on most browsers, so use
+            // text/plain for sharing while keeping the .json filename.
             const file = new File([data], filename, {
-                type: "application/json",
+                type: "text/plain",
             });
 
             if (
@@ -351,7 +353,7 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
     return (
         <div
             className={cn(
-                "flex justify-end gap-2 max-[412px]:!mb-4 max-[340px]:flex-col",
+                "flex justify-end gap-2 max-[412px]:!mb-4 max-[640px]:overflow-x-auto max-[640px]:max-w-[calc(100vw-1rem)] max-[640px]:justify-start max-[640px]:[&>button]:flex-shrink-0 max-[640px]:[&>div]:flex-shrink-0 max-[640px]:pb-1",
                 className,
             )}
         >
