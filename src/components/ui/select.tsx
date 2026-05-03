@@ -6,17 +6,6 @@ import { cn } from "@/lib/utils";
 
 type Options<T extends string> = Partial<Record<T, string>>;
 
-const PORTAL_CONTAINER_ID = "map-modal-dialog-container-leaflet";
-
-const usePortalContainer = () => {
-    const [container, setContainer] =
-        React.useState<HTMLElement | null>(null);
-    React.useEffect(() => {
-        setContainer(document.getElementById(PORTAL_CONTAINER_ID));
-    }, []);
-    return container;
-};
-
 const Select = <T extends string>({
     trigger,
     options,
@@ -38,7 +27,6 @@ const Select = <T extends string>({
     const { placeholder, className } =
         typeof trigger === "string" ? { placeholder: trigger, className: "" } : trigger;
     const [open, setOpen] = React.useState(false);
-    const portalContainer = usePortalContainer();
     const triggerRef = React.useRef<HTMLButtonElement>(null);
     const [triggerWidth, setTriggerWidth] = React.useState<number | undefined>(
         undefined,
@@ -91,7 +79,6 @@ const Select = <T extends string>({
                 </span>
                 <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
             </PopoverPrimitive.Trigger>
-            <PopoverPrimitive.Portal container={portalContainer}>
                 <PopoverPrimitive.Content
                     align="start"
                     sideOffset={4}
@@ -161,7 +148,6 @@ const Select = <T extends string>({
                             })}
                     </div>
                 </PopoverPrimitive.Content>
-            </PopoverPrimitive.Portal>
         </PopoverPrimitive.Root>
     );
 };
