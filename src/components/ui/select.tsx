@@ -6,17 +6,6 @@ import { cn } from "@/lib/utils";
 
 type Options<T extends string> = Partial<Record<T, string>>;
 
-const PORTAL_CONTAINER_ID = "map-modal-dialog-container-leaflet";
-
-const usePortalContainer = () => {
-    const [container, setContainer] =
-        React.useState<HTMLElement | null>(null);
-    React.useEffect(() => {
-        setContainer(document.getElementById(PORTAL_CONTAINER_ID));
-    }, []);
-    return container;
-};
-
 const Select = <T extends string>({
     trigger,
     options,
@@ -38,7 +27,6 @@ const Select = <T extends string>({
     const { placeholder, className } =
         typeof trigger === "string" ? { placeholder: trigger, className: "" } : trigger;
     const [open, setOpen] = React.useState(false);
-    const portalContainer = usePortalContainer();
     const triggerRef = React.useRef<HTMLButtonElement>(null);
     const [triggerWidth, setTriggerWidth] = React.useState<number | undefined>(
         undefined,
@@ -91,7 +79,6 @@ const Select = <T extends string>({
                 </span>
                 <ChevronDown className="h-4 w-4 opacity-50 shrink-0 ml-2" />
             </PopoverPrimitive.Trigger>
-            <PopoverPrimitive.Portal container={portalContainer}>
                 <PopoverPrimitive.Content
                     align="start"
                     sideOffset={4}
@@ -100,55 +87,67 @@ const Select = <T extends string>({
                         minWidth: "8rem",
                     }}
                     className={cn(
-                        "z-[1050] max-h-96 overflow-y-auto overscroll-contain rounded-md border bg-popover p-1 text-popover-foreground shadow-md",
+                        "z-[1050] rounded-md border bg-popover text-popover-foreground shadow-md",
                         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
                         "data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
                     )}
                 >
-                    {options &&
-                        Object.entries(options).map(([k, label]) => (
-                            <SelectItem
-                                key={k}
-                                selected={k === value}
-                                onSelect={() => handleSelect(k as T)}
-                            >
-                                {label as string}
-                            </SelectItem>
-                        ))}
-                    {groups &&
-                        Object.entries(groups).map(([label, v]) => {
-                            const opts =
-                                v && typeof v === "object" && "options" in v
-                                    ? v.options
-                                    : (v as Options<T>);
-                            const groupDisabled =
-                                v && typeof v === "object" && "disabled" in v
-                                    ? !!v.disabled
-                                    : false;
-                            return (
-                                <div key={label}>
-                                    <div className="py-1.5 pl-8 pr-2 text-sm font-semibold">
-                                        {label}
+                    <div
+                        className="p-1"
+                        style={{
+                            maxHeight: "24rem",
+                            overflowY: "auto",
+                            overscrollBehavior: "contain",
+                            touchAction: "pan-y",
+                            WebkitOverflowScrolling: "touch",
+                        }}
+                    >
+                        {options &&
+                            Object.entries(options).map(([k, label]) => (
+                                <SelectItem
+                                    key={k}
+                                    selected={k === value}
+                                    onSelect={() => handleSelect(k as T)}
+                                >
+                                    {label as string}
+                                </SelectItem>
+                            ))}
+                        {groups &&
+                            Object.entries(groups).map(([label, v]) => {
+                                const opts =
+                                    v && typeof v === "object" && "options" in v
+                                        ? v.options
+                                        : (v as Options<T>);
+                                const groupDisabled =
+                                    v &&
+                                    typeof v === "object" &&
+                                    "disabled" in v
+                                        ? !!v.disabled
+                                        : false;
+                                return (
+                                    <div key={label}>
+                                        <div className="py-1.5 pl-8 pr-2 text-sm font-semibold">
+                                            {label}
+                                        </div>
+                                        {Object.entries(opts).map(
+                                            ([k, itemLabel]) => (
+                                                <SelectItem
+                                                    key={k}
+                                                    selected={k === value}
+                                                    disabled={groupDisabled}
+                                                    onSelect={() =>
+                                                        handleSelect(k as T)
+                                                    }
+                                                >
+                                                    {itemLabel as string}
+                                                </SelectItem>
+                                            ),
+                                        )}
                                     </div>
-                                    {Object.entries(opts).map(
-                                        ([k, itemLabel]) => (
-                                            <SelectItem
-                                                key={k}
-                                                selected={k === value}
-                                                disabled={groupDisabled}
-                                                onSelect={() =>
-                                                    handleSelect(k as T)
-                                                }
-                                            >
-                                                {itemLabel as string}
-                                            </SelectItem>
-                                        ),
-                                    )}
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
+                    </div>
                 </PopoverPrimitive.Content>
-            </PopoverPrimitive.Portal>
         </PopoverPrimitive.Root>
     );
 };
