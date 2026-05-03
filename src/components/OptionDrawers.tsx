@@ -277,52 +277,18 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
         }
     };
 
-    const saveToFile = async () => {
+    const saveToFile = () => {
         try {
             const data = JSON.stringify($hidingZone, null, 2);
-            const timestamp = new Date()
-                .toISOString()
-                .replace(/[:.]/g, "-")
-                .slice(0, 19);
-            const filename = `jetlag-hiding-zone-${timestamp}.json`;
-            // Web Share API blocks application/json on most browsers, so use
-            // text/plain for sharing while keeping the .json filename.
-            const file = new File([data], filename, {
-                type: "text/plain",
-            });
-
-            if (
-                typeof navigator !== "undefined" &&
-                typeof navigator.canShare === "function" &&
-                navigator.canShare({ files: [file] }) &&
-                typeof navigator.share === "function"
-            ) {
-                try {
-                    await navigator.share({
-                        files: [file],
-                        title: "Jet Lag Hiding Zone",
-                    });
-                    toast.success("Hiding zone shared", { autoClose: 2000 });
-                    return;
-                } catch (err) {
-                    if (
-                        err instanceof DOMException &&
-                        err.name === "AbortError"
-                    ) {
-                        return;
-                    }
-                    console.warn(
-                        "Native file share failed, falling back to download:",
-                        err,
-                    );
-                }
-            }
-
             const blob = new Blob([data], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = filename;
+            const timestamp = new Date()
+                .toISOString()
+                .replace(/[:.]/g, "-")
+                .slice(0, 19);
+            a.download = `jetlag-hiding-zone-${timestamp}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -371,9 +337,9 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
             <Button
                 className="shadow-md"
                 onClick={saveToFile}
-                title="Share the hiding zone as a JSON file (downloads on desktop)"
+                title="Download current hiding zone as a JSON file"
             >
-                Share File
+                Save File
             </Button>
             <Button
                 className="shadow-md"
