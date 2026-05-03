@@ -148,15 +148,24 @@ const SelectContent = React.forwardRef<
             position={position}
             {...props}
         >
+            <SelectScrollUpButton />
             <SelectPrimitive.Viewport
                 className={cn(
-                    "p-1 max-h-96 overflow-y-auto overscroll-contain touch-pan-y",
+                    "p-1 max-h-96",
                     position === "popper" &&
                         "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
                 )}
+                style={{
+                    overflowY: "auto",
+                    overscrollBehavior: "contain",
+                    touchAction: "pan-y",
+                    WebkitOverflowScrolling: "touch",
+                    minHeight: 0,
+                }}
             >
                 {children}
             </SelectPrimitive.Viewport>
+            <SelectScrollDownButton />
         </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
 ));
@@ -213,15 +222,24 @@ const SelectItem = React.forwardRef<
             }}
             onPointerUp={(e) => {
                 if (
-                    e.pointerType === "touch" &&
+                    e.pointerType === "mouse" &&
                     dragRef.current?.moved
                 ) {
+                    // mouse drag-to-scroll: skip Radix's pointerup-based select
+                    e.preventDefault();
+                }
+                props.onPointerUp?.(e);
+            }}
+            onClick={(e) => {
+                // For touch, Radix runs handleSelect on click (not pointerup).
+                // Suppress when the user dragged so scrolling doesn't select.
+                if (dragRef.current?.moved) {
                     e.preventDefault();
                     dragRef.current = null;
                     return;
                 }
                 dragRef.current = null;
-                props.onPointerUp?.(e);
+                props.onClick?.(e);
             }}
         >
             <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
