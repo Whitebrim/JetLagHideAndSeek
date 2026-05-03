@@ -92,6 +92,7 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
     const lastDefaultUnit = useRef($defaultUnit);
     const hasSyncedInitialUnit = useRef(false);
     const [isOptionsOpen, setOptionsOpen] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const currentDefault = $defaultUnit;
@@ -276,6 +277,45 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
         }
     };
 
+    const saveToFile = () => {
+        try {
+            const data = JSON.stringify($hidingZone, null, 2);
+            const blob = new Blob([data], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const timestamp = new Date()
+                .toISOString()
+                .replace(/[:.]/g, "-")
+                .slice(0, 19);
+            a.download = `jetlag-hiding-zone-${timestamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            toast.success("Hiding zone saved to file", { autoClose: 2000 });
+        } catch (e) {
+            console.error("Failed to save file:", e);
+            toast.error(`Failed to save file: ${e}`);
+        }
+    };
+
+    const loadFromFile = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const result = event.target?.result;
+            if (typeof result === "string") {
+                loadHidingZone(result);
+            } else {
+                toast.error("Failed to read file");
+            }
+        };
+        reader.onerror = () => {
+            toast.error("Failed to read file");
+        };
+        reader.readAsText(file);
+    };
+
     return (
         <div
             className={cn(
@@ -283,6 +323,31 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                 className,
             )}
         >
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) loadFromFile(file);
+                    e.target.value = "";
+                }}
+            />
+            <Button
+                className="shadow-md"
+                onClick={saveToFile}
+                title="Download current hiding zone as a JSON file"
+            >
+                Save File
+            </Button>
+            <Button
+                className="shadow-md"
+                onClick={() => fileInputRef.current?.click()}
+                title="Load a hiding zone from a JSON file"
+            >
+                Load File
+            </Button>
             <Button
                 className="shadow-md"
                 onClick={async () => {
