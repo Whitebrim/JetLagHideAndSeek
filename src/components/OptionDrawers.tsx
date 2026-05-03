@@ -319,7 +319,7 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
     return (
         <div
             className={cn(
-                "flex justify-end gap-2 max-[412px]:!mb-4 max-[640px]:overflow-x-auto max-[640px]:max-w-[calc(100vw-1rem)] max-[640px]:justify-start max-[640px]:[&>button]:flex-shrink-0 max-[640px]:[&>div]:flex-shrink-0 max-[640px]:pb-1",
+                "flex justify-end gap-2 max-[412px]:!mb-4 max-[640px]:overflow-x-auto max-[640px]:w-[90vw] max-[640px]:justify-start max-[640px]:[&>button]:flex-shrink-0 max-[640px]:[&>div]:flex-shrink-0 max-[640px]:pb-1",
                 className,
             )}
         >
