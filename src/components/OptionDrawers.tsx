@@ -365,30 +365,35 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                     let shareUrl = `${baseUrl}?${HIDING_ZONE_COMPRESSED_URL_PARAM}=${compressedData}`;
 
                     if ($alwaysUsePastebin || shareUrl.length > 2000) {
-                        if (!$pastebinApiKey) {
-                            toast.error(
-                                "Data is too large for a URL or Pastebin is forced. Please enter a Pastebin API key in Options to share via Pastebin.",
+                        if ($pastebinApiKey) {
+                            try {
+                                toast.info(
+                                    "Data is being shared via Pastebin...",
+                                );
+                                const pastebinUrl = await uploadToPastebin(
+                                    $pastebinApiKey,
+                                    hidingZoneString,
+                                );
+                                const pasteId = pastebinUrl.substring(
+                                    pastebinUrl.lastIndexOf("/") + 1,
+                                );
+                                shareUrl = `${baseUrl}?${PASTEBIN_URL_PARAM}=${pasteId}`;
+                                toast.success(
+                                    "Successfully uploaded to Pastebin! URL is ready to be shared.",
+                                );
+                            } catch (error) {
+                                console.error("Pastebin upload failed:", error);
+                                toast.warning(
+                                    "Pastebin upload failed, falling back to file download.",
+                                );
+                                saveToFile();
+                                return;
+                            }
+                        } else {
+                            toast.info(
+                                "Data is too large for a URL — saving to file instead.",
                             );
-                            return;
-                        }
-                        try {
-                            toast.info("Data is being shared via Pastebin...");
-                            const pastebinUrl = await uploadToPastebin(
-                                $pastebinApiKey,
-                                hidingZoneString,
-                            );
-                            const pasteId = pastebinUrl.substring(
-                                pastebinUrl.lastIndexOf("/") + 1,
-                            );
-                            shareUrl = `${baseUrl}?${PASTEBIN_URL_PARAM}=${pasteId}`;
-                            toast.success(
-                                "Successfully uploaded to Pastebin! URL is ready to be shared.",
-                            );
-                        } catch (error) {
-                            console.error("Pastebin upload failed:", error);
-                            toast.error(
-                                `Pastebin upload failed. Please check your API key and try again.`,
-                            );
+                            saveToFile();
                             return;
                         }
                     }
@@ -552,8 +557,9 @@ export const OptionDrawers = ({ className }: { className?: string }) => {
                                     placeholder="Enter your Pastebin API key"
                                 />
                                 <p className="text-xs text-gray-500">
-                                    Needed for sharing large game data. Create a
-                                    key{" "}
+                                    Optional. If set, large game data will be
+                                    shared via Pastebin URL; otherwise it falls
+                                    back to a JSON file download. Create a key{" "}
                                     <a
                                         href="https://pastebin.com/doc_api"
                                         target="_blank"
