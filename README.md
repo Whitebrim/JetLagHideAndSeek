@@ -2,6 +2,19 @@
 
 A tool to trivially generate interactive maps for viewing hiding possibilities in Jet Lag The Game's Hide and Seek. So far, the following questions have been implemented (see https://github.com/taibeled/JetLagHideAndSeek/issues/9 for more):
 
+## What's different in this fork
+
+This is a fork of the original [taibeled/JetLagHideAndSeek](https://github.com/taibeled/JetLagHideAndSeek) with a few quality-of-life improvements:
+
+- **Save and load games as files.** Two new buttons, **Save File** and **Load File**, sit next to **Share** in the top bar. You can dump the current game state (questions, zones, settings) into a plain JSON file and load it back on any device.
+- **Share works without Pastebin.** The original required a Pastebin API key for large games, otherwise the Share button would just error out. Now, if no key is set or Pastebin is unreachable, the data is automatically saved to a file you can send however you like.
+- **Mobile-friendly button row.** The top buttons no longer overflow the screen or cover map controls — on small screens they sit on the right side and scroll horizontally.
+- **Drag-to-scroll dropdowns.** The original question-type dropdowns could only be scrolled with the up/down arrows, which is awkward on touch. Dropdowns now scroll with a normal swipe gesture.
+
+Live demo: https://whitebrim.github.io/JetLagHideAndSeek/
+
+---
+
 - Radius
     - All
 - Thermometer
